@@ -169,7 +169,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   } else {
     // TODO: Laser updates
       ekf_.H_ = H_laser_;
-      ekf_.R_ = R_radar_;
+      ekf_.R_ = R_laser_;
       ekf_.Update(measurement_pack.raw_measurements_);
 
   }
