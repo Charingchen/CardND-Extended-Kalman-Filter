@@ -32,6 +32,7 @@ void KalmanFilter::Predict() {
     x_ = F_ * x_;
     MatrixXd Ft = F_.transpose();
     P_ = F_ * P_ * Ft + Q_;
+    cout <<"Predicted x:" <<endl<< x_<<endl;
 }
 
 void KalmanFilter::Update(const VectorXd &z) {
@@ -54,6 +55,7 @@ void KalmanFilter::General_update(const VectorXd &y){
     MatrixXd I = MatrixXd::Identity(x_.size(),x_.size());
     
     P_ = (I - K * H_) * P_;
+    
 }
 void KalmanFilter::UpdateEKF(const VectorXd &z) {
   /**
@@ -68,13 +70,18 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
     cout << "-----------"<< endl<<"H = "<<H<<endl<<"----"<<endl;
     VectorXd y = z - H;
     cout << "-----------"<< endl<<"before y = "<<y<<endl<<"----"<<endl;
+    // need to reduce the phi until it less than pi
+    while (y(1)<-M_PI || y(1)>M_PI) {
+        // if the phi is less than pi, plus by pi until it is greater than -pi
+        if (y(1)< -M_PI) {
+            y(1) += M_PI;
+        }
+        // if the phi is greater than pi, minus by pi until it is less than pi
+        else if (y(1)> M_PI){
+            y(1) -= M_PI;
+        }
+    }
     
-    if (y(1)< -M_PI) {
-        y(1) = -M_PI;
-    }
-    else if (y(1)> M_PI){
-        y(1) = M_PI;
-    }
     cout << "-----------"<< endl<<"after y = "<<y<<endl<<"----"<<endl<<endl;
     
     General_update(y);
