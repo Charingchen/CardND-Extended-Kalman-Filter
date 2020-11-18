@@ -55,6 +55,27 @@ The video below is my implementation of Extend Kalman filter.
 
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/UrreDikcU2U/0.jpg)](https://youtu.be/UrreDikcU2U)
 
+## Udacity Review Feedback
+```c
+void KalmanFilter::Predict() {
+  /**
+   * TODO: predict the state
+   */
+    x_ = F_ * x_;
+    MatrixXd Ft = F_.transpose();
+    P_ = F_ * P_ * Ft + Q_;
+```
+If you happen to wonder how we could leverage a more complicated nonlinear process model to achieve better estimation results with EKF, please refer to the "Model Forecast Step" section in this [paper](https://www.cse.sc.edu/~terejanu/files/tutorialEKF.pdf). The key idea is to expand the process nonlinear vector function in first order Taylor series and approximate this way the forecast.
+```c
+void KalmanFilter::UpdateEKF(const VectorXd &z) {
+  /**
+   * TODO: update the state by using Extended Kalman Filter equations
+   */
+    float rho = sqrt(x_(0)*x_(0) + x_(1)*x_(1));
+    float phi = atan2(x_(1), x_(0));
+```
+The behavior of atan2(0,0) is undefined, you might want to handle this case properly to build a robust implementation. http://www.cplusplus.com/reference/cmath/atan2/
+
 ## Other Important Dependencies
 
 * cmake >= 3.5
@@ -96,22 +117,3 @@ This is optional!
 If you'd like to generate your own radar and lidar data, see the
 [utilities repo](https://github.com/udacity/CarND-Mercedes-SF-Utilities) for
 Matlab scripts that can generate additional data.
-
-## Project Instructions and Rubric
-
-Note: regardless of the changes you make, your project must be buildable using
-cmake and make!
-
-More information is only accessible by people who are already enrolled in Term 2 (three-term version) or Term 1 (two-term version)
-of CarND. If you are enrolled, see the Project Resources page in the classroom
-for instructions and the project rubric.
-
-## Hints and Tips!
-
-* You don't have to follow this directory structure, but if you do, your work
-  will span all of the .cpp files here. Keep an eye out for TODOs.
-* Students have reported rapid expansion of log files when using the term 2 simulator.  This appears to be associated with not being connected to uWebSockets.  If this does occur,  please make sure you are conneted to uWebSockets. The following workaround may also be effective at preventing large log files.
-
-    + create an empty log file
-    + remove write permissions so that the simulator can't write to log
- * Please note that the ```Eigen``` library does not initialize ```VectorXd``` or ```MatrixXd``` objects with zeros upon creation.
