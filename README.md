@@ -7,24 +7,8 @@ This project involves the Term 2 Simulator which can be downloaded [here](https:
 
 This repository includes two files that can be used to set up and install [uWebSocketIO](https://github.com/uWebSockets/uWebSockets) for either Linux or Mac systems. For windows you can use either Docker, VMware, or even [Windows 10 Bash on Ubuntu](https://www.howtogeek.com/249966/how-to-install-and-use-the-linux-bash-shell-on-windows-10/) to install uWebSocketIO. Please see the uWebSocketIO Starter Guide page in the classroom within the EKF Project lesson for the required version and installation scripts.
 
-Once the install for uWebSocketIO is complete, the main program can be built and run by doing the following from the project top directory.
-
-1. mkdir build
-2. cd build
-3. cmake ..
-4. make
-5. ./ExtendedKF
-
-Tips for setting up your environment can be found in the classroom lesson for this project.
-
-Note that the programs that need to be written to accomplish the project are src/FusionEKF.cpp, src/FusionEKF.h, kalman_filter.cpp, kalman_filter.h, tools.cpp, and tools.h
-
-The program main.cpp has already been filled out, but feel free to modify it.
-
-Here is the main protocol that main.cpp uses for uWebSocketIO in communicating with the simulator.
-
 ---
-Note: I use Xcode to edit and debug this project, xcode project file is at [ide_profiles/xcode/ExtendedKF.xcodeproj](./ide_profiles/xcode/ExtendedKF.xcodeproj)
+**Note**: I use Xcode to edit and debug this project, xcode project file is at [ide_profiles/xcode/ExtendedKF.xcodeproj](./ide_profiles/xcode/ExtendedKF.xcodeproj)
 
 To create Xcode IDE profile please see [ide_profiles/README.md](./ide_profiles/README.md)
 
@@ -49,6 +33,102 @@ To create Xcode IDE profile please see [ide_profiles/README.md](./ide_profiles/R
 ["rmse_vy"]
 
 ---
+## Code Walk-through
+The following logic is located in `FusionEKF.cpp`
+1. Determine if everything is initialized or not
+    
+    If not, initialize vector `x_` inside `KalmanFilter` instance according to the sensor type:
+    *  Radar: Calculate px, py, vx, vy from the measurement rho, phi, rho_dot using geometry.
+
+      <img src="./images/Radar.PNG" width="300">
+
+    * Laser: The measurement only contain px and py. Only feed those into `x_[0]` and `x_[1]`
+
+    * Record the previous time stamp from the measurement pack
+
+    If initialized, then go to Prediction step.
+  
+
+2. Prediction
+
+   First, calculate dt, dt^2, dt^3, dt^4 from the previous timestamp. Then create a covariance matrix of process noise  and feed into `Q_` in `KalmanFilter`
+
+    <img src="./images/Q_matrix.PNG" >
+    
+    Where σ^2ax and σ^2ay equals 9 in this case. 
+
+    Next, call function `Predict` in `KalmanFilter` Class, where state is predicted by the state-transition matrix F
+    ```c
+    x_ = F_ * x_;
+    MatrixXd Ft = F_.transpose();
+    P_ = F_ * P_ * Ft + Q_;
+    ```
+
+3. After the prediction is made, update the Observation matrix H and the covariance of the observation noise according to the sensor type
+  
+  * If it is radar, H is calculate Jacobian from `x_`.
+
+    <img src="./images/jacob.PNG" >
+
+    And then use `UpdateEKF` from `KalmanFilter`
+    ```c
+    void KalmanFilter::UpdateEKF(const VectorXd &z) {
+    float rho = sqrt(x_(0)*x_(0) + x_(1)*x_(1));
+    float phi = atan2(x_(1), x_(0));
+    float rho_dot = (x_(0)*x_(2)+x_(1)*x_(3))/rho;
+    
+    VectorXd H = VectorXd(3);
+    H << rho,phi,rho_dot ;
+    VectorXd y = z - H;
+    
+    // need to reduce the phi until it is within -pi and pi
+    while (y(1)<-M_PI || y(1)>M_PI) {
+        // if the phi is less than -pi, plus by pi until it is greater than -pi
+        if (y(1)< -M_PI) {
+            y(1) += M_PI;
+        }
+        // if the phi is greater than pi, minus by pi until it is less than pi
+        else if (y(1)> M_PI){
+            y(1) -= M_PI;
+        }
+    } 
+    General_update(y);
+    }
+    ```
+
+* If it is Laser, takes the pre-defined H_laser and R_laser values:
+  ```c
+  //measurement covariance matrix - laser
+  R_laser_ << 0.0225, 0,
+              0, 0.0225;
+  // H as defined in the class for laser. I only need px and py for lidar reading
+  H_laser_ << 1,0,0,0,
+              0,1,0,0;
+  ```
+  And then update using `Update` in `KalmenFilter`
+  ```c
+  void KalmanFilter::Update(const VectorXd &z) {
+    VectorXd y = z - H_ * x_;
+    General_update(y);
+  }
+
+  void KalmanFilter::General_update(const VectorXd &y){
+      MatrixXd Ht = H_.transpose();
+      MatrixXd S = H_ * P_ * Ht + R_;
+      MatrixXd Si = S.inverse();
+      MatrixXd K = P_ * Ht * Si;
+      // New state
+      x_ = x_ + (K * y);
+      
+      // Define Identity matrix based on the x size
+      MatrixXd I = MatrixXd::Identity(x_.size(),x_.size());
+      
+      P_ = (I - K * H_) * P_;    
+  }
+  ```
+
+
+
 ## Finial Result Video
 Lidar measurements are red circles, radar measurements are blue circles with an arrow pointing in the direction of the observed angle, and estimation markers are green triangles.The video below shows what the simulator looks like when a c++ script is using its Kalman filter to track the object. The simulator provides the script the measured data (either lidar or radar), and the script feeds back the measured estimation marker, and RMSE values from its Kalman filter.
 The video below is my implementation of Extend Kalman filter.
