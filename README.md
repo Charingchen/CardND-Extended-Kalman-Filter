@@ -23,7 +23,12 @@ The program main.cpp has already been filled out, but feel free to modify it.
 
 Here is the main protocol that main.cpp uses for uWebSocketIO in communicating with the simulator.
 
+---
+Note: I use Xcode to edit and debug this project, xcode project file is at [ide_profiles/xcode/ExtendedKF.xcodeproj](./ide_profiles/xcode/ExtendedKF.xcodeproj)
 
+To create Xcode IDE profile please see [ide_profiles/README.md](./ide_profiles/README.md)
+
+---
 **INPUT**: values provided by the simulator to the c++ program
 
 ["sensor_measurement"] => the measurement that the simulator observed (either lidar or radar)
@@ -44,6 +49,11 @@ Here is the main protocol that main.cpp uses for uWebSocketIO in communicating w
 ["rmse_vy"]
 
 ---
+## Finial Result Video
+Lidar measurements are red circles, radar measurements are blue circles with an arrow pointing in the direction of the observed angle, and estimation markers are green triangles.The video below shows what the simulator looks like when a c++ script is using its Kalman filter to track the object. The simulator provides the script the measured data (either lidar or radar), and the script feeds back the measured estimation marker, and RMSE values from its Kalman filter.
+The video below is my implementation of Extend Kalman filter.
+
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/UrreDikcU2U/0.jpg)](https://youtu.be/UrreDikcU2U)
 
 ## Other Important Dependencies
 
@@ -105,30 +115,3 @@ for instructions and the project rubric.
     + create an empty log file
     + remove write permissions so that the simulator can't write to log
  * Please note that the ```Eigen``` library does not initialize ```VectorXd``` or ```MatrixXd``` objects with zeros upon creation.
-
-## Call for IDE Profiles Pull Requests
-
-Help your fellow students!
-
-We decided to create Makefiles with cmake to keep this project as platform
-agnostic as possible. Similarly, we omitted IDE profiles in order to ensure
-that students don't feel pressured to use one IDE or another.
-
-However! We'd love to help people get up and running with their IDEs of choice.
-If you've created a profile for an IDE that you think other students would
-appreciate, we'd love to have you add the requisite profile files and
-instructions to ide_profiles/. For example if you wanted to add a VS Code
-profile, you'd add:
-
-* /ide_profiles/vscode/.vscode
-* /ide_profiles/vscode/README.md
-
-The README should explain what the profile does, how to take advantage of it,
-and how to install it.
-
-Regardless of the IDE used, every submitted project must
-still be compilable with cmake and make.
-
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
-
