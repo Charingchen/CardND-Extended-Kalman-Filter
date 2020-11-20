@@ -1,5 +1,4 @@
-# Extended Kalman Filter Project Starter Code
-Self-Driving Car Engineer Nanodegree Program
+# Extended Kalman Filter Project
 
 In this project you will utilize a kalman filter to estimate the state of a moving object of interest with noisy lidar and radar measurements. Passing the project requires obtaining RMSE values that are lower than the tolerance outlined in the project rubric. 
 
@@ -12,27 +11,10 @@ This repository includes two files that can be used to set up and install [uWebS
 
 To create Xcode IDE profile please see [ide_profiles/README.md](./ide_profiles/README.md)
 
----
-**INPUT**: values provided by the simulator to the c++ program
-
-["sensor_measurement"] => the measurement that the simulator observed (either lidar or radar)
+## Original Udacity Repo
+More detailed variable descriptions and instruction, please refer to [udacity/CarND-Extended-Kalman-Filter-Project](https://github.com/udacity/CarND-Extended-Kalman-Filter-Project)
 
 
-**OUTPUT**: values provided by the c++ program to the simulator
-
-["estimate_x"] <= kalman filter estimated position x
-
-["estimate_y"] <= kalman filter estimated position y
-
-["rmse_x"]
-
-["rmse_y"]
-
-["rmse_vx"]
-
-["rmse_vy"]
-
----
 ## Code Walk-through
 The following logic is located in `FusionEKF.cpp`
 1. Determine if everything is initialized or not
